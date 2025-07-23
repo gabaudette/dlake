@@ -14,7 +14,7 @@ const client = new discord_js_1.Client({
     intents: [
         discord_js_1.GatewayIntentBits.Guilds,
         discord_js_1.GatewayIntentBits.GuildMessages,
-        discord_js_1.GatewayIntentBits.GuildVoiceStates
+        discord_js_1.GatewayIntentBits.GuildVoiceStates,
     ],
 });
 client.once("ready", () => {
@@ -39,7 +39,7 @@ async function handleCommand(interaction) {
     const queue = queues.get(interaction.guildId);
     switch (interaction.commandName) {
         case "ping":
-            await interaction.reply("🏓 Pong! Bot is working correctly.");
+            await interaction.reply("🏓 Pong! Bot is working correctly... << DLake official sound ! >>");
             break;
         case "play":
             _playSong(interaction, queue);
@@ -123,7 +123,8 @@ async function _playSong(interaction, queue) {
     try {
         const info = await ytdl_core_1.default.getInfo(url);
         songInfo = {
-            title: info.videoDetails.title ?? "A Youtube video",
+            title: info.videoDetails.title ??
+                "An unknown youtube video (probably an obscured one you can't play anyway)",
             url: url,
         };
     }
@@ -133,7 +134,7 @@ async function _playSong(interaction, queue) {
     }
     if (!queue) {
         if (!interaction.guild) {
-            await interaction.reply("This command can only be used in a server.");
+            await interaction.editReply("This command can only be used in a server.");
             return;
         }
         const connection = (0, voice_1.joinVoiceChannel)({
@@ -156,5 +157,25 @@ async function _playSong(interaction, queue) {
         queues.set(interaction.guildId, newQueue);
         connection.subscribe(player);
     }
-    await (0, song_1.playSong)(interaction, queue);
+    else {
+        // Add song to existing queue
+        queue.songs.push(songInfo);
+        await interaction.editReply(`🎵 Added to queue: **${songInfo.title}**`);
+        // If nothing is currently playing, start playing
+        if (!queue.playing) {
+            const currentQueue = queues.get(interaction.guildId);
+            if (!currentQueue) {
+                await interaction.followUp("❌ Failed to retrieve queue.");
+                return;
+            }
+            await (0, song_1.playSong)(interaction, currentQueue);
+        }
+        return;
+    }
+    const currentQueue = queues.get(interaction.guildId);
+    if (!currentQueue) {
+        await interaction.editReply("❌ Failed to create or retrieve queue.");
+        return;
+    }
+    await (0, song_1.playSong)(interaction, currentQueue);
 }

@@ -165,7 +165,7 @@ async function _playSong(
 
 	if (!queue) {
 		if (!interaction.guild) {
-			await interaction.reply("This command can only be used in a server.");
+			await interaction.editReply("This command can only be used in a server.");
 			return;
 		}
 
@@ -191,7 +191,27 @@ async function _playSong(
 
 		queues.set(interaction.guildId, newQueue);
 		connection.subscribe(player);
+	} else {
+		// Add song to existing queue
+		queue.songs.push(songInfo);
+		await interaction.editReply(`🎵 Added to queue: **${songInfo.title}**`);
+
+		// If nothing is currently playing, start playing
+		if (!queue.playing) {
+			const currentQueue = queues.get(interaction.guildId);
+			if (!currentQueue) {
+				await interaction.followUp("❌ Failed to retrieve queue.");
+				return;
+			}
+			await playSong(interaction, currentQueue);
+		}
+		return;
 	}
 
-	await playSong(interaction, queue);
+	const currentQueue = queues.get(interaction.guildId);
+	if (!currentQueue) {
+		await interaction.editReply("❌ Failed to create or retrieve queue.");
+		return;
+	}
+	await playSong(interaction, currentQueue);
 }
