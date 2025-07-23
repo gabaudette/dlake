@@ -64,7 +64,6 @@ A private Discord music bot built as a hobby project for learning purposes and u
 
 - `npm run dev` - Start in development mode with auto-reload
 - `npm run build` - Compile TypeScript to JavaScript
-- `npm run lint` - Run linting checks
 
 ## Project Structure
 
