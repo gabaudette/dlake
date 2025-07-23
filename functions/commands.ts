@@ -396,57 +396,57 @@ export async function registerCommands(): Promise<void> {
 }
 
 export async function handleCommand(
-		interaction: ChatInputCommandInteraction<CacheType>,
-		queue?: Queue,
-		queues?: Map<string, Queue>,
-	): Promise<void> {
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue?: Queue,
+	queues?: Map<string, Queue>,
+): Promise<void> {
+	try {
+		switch (interaction.commandName) {
+			case "ping":
+				await _handlePing(interaction);
+				break;
+			case "play":
+				await _handlePlaySong(interaction, queue, queues);
+				break;
+			case "skip":
+				await _handleSkip(interaction, queue);
+				break;
+			case "pause":
+				await _handlePause(interaction, queue);
+				break;
+			case "resume":
+				await _handleResume(interaction, queue);
+				break;
+			case "stop":
+				await _handleStop(interaction, queue, queues);
+				break;
+			case "queue":
+				await _handleQueue(interaction, queue);
+				break;
+			case "nowplaying":
+				await _handleNowPlaying(interaction, queue);
+				break;
+		}
+	} catch (error) {
+		console.error("Error in handleCommand:", error);
 		try {
-			switch (interaction.commandName) {
-				case "ping":
-					await _handlePing(interaction);
-					break;
-				case "play":
-					await _handlePlaySong(interaction, queue, queues);
-					break;
-				case "skip":
-					await _handleSkip(interaction, queue);
-					break;
-				case "pause":
-					await _handlePause(interaction, queue);
-					break;
-				case "resume":
-					await _handleResume(interaction, queue);
-					break;
-				case "stop":
-					await _handleStop(interaction, queue, queues);
-					break;
-				case "queue":
-					await _handleQueue(interaction, queue);
-					break;
-				case "nowplaying":
-					await _handleNowPlaying(interaction, queue);
-					break;
-			}
-		} catch (error) {
-			console.error("Error in handleCommand:", error);
-			try {
-				if (interaction.isChatInputCommand()) {
-					if (!interaction.replied && !interaction.deferred) {
-						await interaction.reply(
-							"❌ An unexpected error occurred. Please try again.",
-						);
-					} else if (interaction.deferred) {
-						await interaction.editReply(
-							"❌ An unexpected error occurred. Please try again.",
-						);
-					} else {
-						await interaction.followUp(
-							"❌ An unexpected error occurred. Please try again.",
-						);
-					}
+			if (interaction.isChatInputCommand()) {
+				if (!interaction.replied && !interaction.deferred) {
+					await interaction.reply(
+						"❌ An unexpected error occurred. Please try again.",
+					);
+				} else if (interaction.deferred) {
+					await interaction.editReply(
+						"❌ An unexpected error occurred. Please try again.",
+					);
+				} else {
+					await interaction.followUp(
+						"❌ An unexpected error occurred. Please try again.",
+					);
 				}
-			} catch (replyError) {
-				console.error("Error sending error message:", replyError);
 			}
+		} catch (replyError) {
+			console.error("Error sending error message:", replyError);
 		}
 	}
+}
