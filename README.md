@@ -89,11 +89,7 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 
 ## Error Handling
 
-The bot includes comprehensive error handling to prevent crashes:
-- Global error handlers for unhandled rejections
-- Try-catch blocks around all critical operations
-- Automatic queue cleanup on errors
-- Graceful connection management
+The bot includes comprehensive error handling to prevent crashes
 
 ## Contributing
 
