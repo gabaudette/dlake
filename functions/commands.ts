@@ -1,4 +1,6 @@
 import { assert } from "console";
+import dotenv from "dotenv";
+dotenv.config();
 import {
 	type RESTPostAPIChatInputApplicationCommandsJSONBody,
 	SlashCommandBuilder,
@@ -7,8 +9,8 @@ import type { Command } from "../types/types";
 
 const GLOBAL_COMMANDS: Command[] = [
 	{
-		name: "play",
-		description: "Play a song",
+		name: "ping",
+		description: "Test if the bot is responding",
 	},
 	{
 		name: "skip",
@@ -50,7 +52,20 @@ function buildCommands(): RESTPostAPIChatInputApplicationCommandsJSONBody[] {
 		);
 	}
 
-	return commands.map((command) => command.toJSON());
+	const newCommands = [
+		...commands,
+		new SlashCommandBuilder()
+			.setName("play")
+			.setDescription("Play a song")
+			.addStringOption((option) =>
+				option
+					.setName("url")
+					.setDescription("The URL of the song to play")
+					.setRequired(true),
+			),
+	];
+
+	return newCommands.map((command) => command.toJSON());
 }
 
 export async function registerCommands() {

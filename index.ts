@@ -14,11 +14,19 @@ import {
 	createAudioPlayer,
 	joinVoiceChannel,
 	NoSubscriberBehavior,
+	VoiceConnectionStatus,
+	entersState,
 } from "@discordjs/voice";
-import play from "play-dl";
+import ytdl from "@distube/ytdl-core";
+import dotenv from "dotenv";
+dotenv.config();
 
 const client = new Client({
-	intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
+	intents: [
+		GatewayIntentBits.Guilds,
+		GatewayIntentBits.GuildMessages,
+		GatewayIntentBits.GuildVoiceStates,
+	],
 });
 
 client.once("ready", () => {
@@ -48,37 +56,58 @@ async function handleCommand(interaction: Interaction<CacheType>) {
 	}
 
 	const queue = queues.get(interaction.guildId);
-	if (!queue) {
-		await interaction.reply("No music queue found for this server.");
-		return;
-	}
 
 	switch (interaction.commandName) {
+		case "ping":
+			await interaction.reply(
+				"🏓 Pong! Bot is working correctly... << DLake official sound ! >>",
+			);
+			break;
 		case "play":
 			_playSong(interaction, queue);
 			break;
 		case "skip":
+			if (!queue) {
+				await interaction.reply("No music queue found for this server.");
+				return;
+			}
 			queue.player.stop();
 			await interaction.reply("Skipped the current song.");
 			break;
 		case "pause":
+			if (!queue) {
+				await interaction.reply("No music queue found for this server.");
+				return;
+			}
 			queue.player.pause();
 			queue.paused = true;
 			await interaction.reply("Paused the current song.");
 			break;
 		case "resume":
+			if (!queue) {
+				await interaction.reply("No music queue found for this server.");
+				return;
+			}
 			if (!queue.paused) return interaction.reply("▶️ Not paused.");
 			queue.player.unpause();
 			queue.paused = false;
 			await interaction.reply("Resumed the current song.");
 			break;
 		case "stop":
+			if (!queue) {
+				await interaction.reply("No music queue found for this server.");
+				return;
+			}
 			queue.songs = [];
 			queue.player.stop();
 			queues.delete(interaction.guildId);
 			await interaction.reply("Stopped the music and cleared the queue.");
 			break;
 		case "queue":
+			if (!queue) {
+				await interaction.reply("No music queue found for this server.");
+				return;
+			}
 			if (queue.songs.length === 0) {
 				await interaction.reply("The queue is empty.");
 			} else {
@@ -89,6 +118,10 @@ async function handleCommand(interaction: Interaction<CacheType>) {
 			}
 			break;
 		case "nowplaying":
+			if (!queue) {
+				await interaction.reply("No music queue found for this server.");
+				return;
+			}
 			await interaction.reply(
 				`🎶 Now playing: **${queue.songs[0]?.title || "Nothing"}**`,
 			);
@@ -118,10 +151,12 @@ async function _playSong(
 	let songInfo: Song;
 
 	try {
-		const info = await play.video_info(url);
+		const info = await ytdl.getInfo(url);
 		songInfo = {
-			title: info.video_details.title ?? "A youtube video",
-			url: info.video_details.url,
+			title:
+				info.videoDetails.title ??
+				"An unknown youtube video (probably an obscured one you can't play anyway)",
+			url: url,
 		};
 	} catch {
 		await interaction.editReply("❌ Failed to retrieve video info.");
@@ -139,9 +174,11 @@ async function _playSong(
 			guildId: interaction.guildId,
 			adapterCreator: interaction.guild.voiceAdapterCreator,
 		});
+
 		const player = createAudioPlayer({
 			behaviors: { noSubscriber: NoSubscriberBehavior.Pause },
 		});
+
 		const newQueue: Queue = {
 			textChannel: interaction.channel as TextChannel,
 			voiceChannelId: memberVoiceChannel.id,
@@ -151,8 +188,10 @@ async function _playSong(
 			playing: false,
 			paused: false,
 		};
+
 		queues.set(interaction.guildId, newQueue);
 		connection.subscribe(player);
 	}
+
 	await playSong(interaction, queue);
 }

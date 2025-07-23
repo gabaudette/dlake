@@ -1,12 +1,10 @@
 {
   "compilerOptions": {
-    "target": "ES2021",
-    "module": "CommonJS",
-    "moduleResolution": "node",
+    "module": "commonjs",
+    "target": "ES2022",
+    "outDir": "dist",
+    "rootDir": ".",
     "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-    "strict": true,
-    "forceConsistentCasingInFileNames": true
+    "skipLibCheck": true
   }
 }

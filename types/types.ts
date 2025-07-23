@@ -1,4 +1,4 @@
-import { AudioPlayer, VoiceConnection } from "@discordjs/voice";
+import type { AudioPlayer, VoiceConnection } from "@discordjs/voice";
 import { clear } from "console";
 import { TextChannel } from "discord.js";
 
@@ -18,6 +18,7 @@ export type Queue = {
 };
 
 export const CCommands = [
+	"ping",
 	"play",
 	"skip",
 	"stop",
