@@ -20,9 +20,9 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 - ⏸️ Pause/Resume playback
 - 🛑 Stop and clear queue
 - 📜 View current queue
+- 🔀 Shuffle the queue
 - 🎶 Show currently playing track
 - 🏓 Ping command for testing
-- 🔀 Shuffle the queue
 
 ## Commands
 
@@ -32,8 +32,10 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 - `/resume` - Resume playback
 - `/stop` - Stop music and clear queue
 - `/queue` - Show current queue
+- `/shuffle` - Shuffle the current queue
 - `/nowplaying` - Show currently playing song
 - `/ping` - Test bot connectivity
+
 
 ## Prerequisites
 
