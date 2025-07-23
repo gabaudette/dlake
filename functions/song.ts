@@ -26,11 +26,13 @@ async function _handleEmptyQueue(
 	onQueueEmpty?: (guildId: string) => void,
 ): Promise<void> {
 	console.log("No songs in the queue to play.");
+
 	try {
 		await queue.textChannel.send("No songs in the queue to play.");
 	} catch (error) {
 		console.error("Error sending message to text channel:", error);
 	}
+
 	try {
 		if (queue.connection.state.status !== VoiceConnectionStatus.Destroyed) {
 			delayedLeaveChannel(queue);
@@ -38,6 +40,7 @@ async function _handleEmptyQueue(
 	} catch (error) {
 		console.error("Error scheduling delayed leave:", error);
 	}
+
 	if (onQueueEmpty && interaction.guildId) {
 		try {
 			onQueueEmpty(interaction.guildId);
@@ -53,6 +56,7 @@ async function _handleNoSong(
 	onQueueEmpty?: (guildId: string) => void,
 ): Promise<void> {
 	console.log("An error has occurred: No song found to play.");
+
 	try {
 		await queue.textChannel.send(
 			"An error has occurred: No song found to play.",
@@ -60,6 +64,7 @@ async function _handleNoSong(
 	} catch (error) {
 		console.error("Error sending message to text channel:", error);
 	}
+
 	queue.playing = false;
 
 	try {
@@ -88,7 +93,6 @@ async function _handleInvalidUrl(
 	console.error("Invalid song URL:", url);
 	queue.textChannel.send("Invalid song URL. Skipping to next song.");
 	queue.songs.shift();
-
 	if (queue.songs.length > 0) {
 		await playSong(interaction, queue, onQueueEmpty);
 		return;
@@ -154,6 +158,7 @@ async function _playAudio(
 	});
 
 	queue.textChannel.send(`🎵 Now playing: **${song.title}**`);
+
 	_handlePlayerIdle(interaction, queue, onQueueEmpty);
 	_handlePlayerError(interaction, queue, onQueueEmpty);
 }
@@ -194,10 +199,7 @@ function _handlePlayerError(
 ): void {
 	queue.player.once("error", async (error) => {
 		console.error("Error occurred while playing the song:", error);
-		queue.textChannel.send(
-			"An error has occurred while trying to play the song.",
-		);
-
+		queue.textChannel.send("An error has occurred while trying to play the song.");
 		queue.songs.shift();
 		if (queue.songs.length > 0) {
 			await playSong(interaction, queue, onQueueEmpty);
@@ -228,6 +230,7 @@ async function _handlePlayError(
 	error?: unknown,
 ): Promise<void> {
 	console.error("Error occurred while trying to play the song:", error);
+
 	queue.textChannel.send(
 		"An error has occurred while trying to play the song.",
 	);
@@ -319,7 +322,6 @@ export function delayedLeaveChannel(queue: Queue): void {
 export function cancelDelayedLeave(queue: Queue): void {
 	const channelId = queue.voiceChannelId;
 	const timeout = leaveTimeouts.get(channelId);
-
 	if (timeout) {
 		clearTimeout(timeout);
 		leaveTimeouts.delete(channelId);
