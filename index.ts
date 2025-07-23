@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/nursery/noExcessiveLinesPerFunction: <explanation> */
 import {
 	type CacheType,
 	type ChatInputCommandInteraction,
@@ -18,7 +17,9 @@ import {
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
 import ytdl from "@distube/ytdl-core";
+// biome-ignore lint/nursery/noUnresolvedImports: This import is necessary for environment variable management
 import dotenv from "dotenv";
+// biome-ignore lint/nursery/noUnresolvedImports: This import is necessary for environment variable management
 import process from "node:process";
 dotenv.config();
 
