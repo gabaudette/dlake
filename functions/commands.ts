@@ -68,7 +68,7 @@ function buildCommands(): RESTPostAPIChatInputApplicationCommandsJSONBody[] {
 	return newCommands.map((command) => command.toJSON());
 }
 
-export async function registerCommands() {
+export async function registerCommands(): Promise<void> {
 	const commands = buildCommands();
 
 	assert(process.env.DISCORD_TOKEN, "DISCORD_TOKEN is not set in .env");
