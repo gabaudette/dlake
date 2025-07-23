@@ -22,6 +22,7 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 - 📜 View current queue
 - 🎶 Show currently playing track
 - 🏓 Ping command for testing
+- 🔀 Shuffle the queue
 
 ## Commands
 
