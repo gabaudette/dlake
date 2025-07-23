@@ -147,9 +147,9 @@ async function _handleResume(
 async function _handleStop(
 	interaction: ChatInputCommandInteraction<CacheType>,
 	queue: Queue | undefined,
-	queues: Map<string, Queue>,
+	queues?: Map<string, Queue>,
 ): Promise<void> {
-	if (!queue) {
+	if (!queue || !interaction.guildId) {
 		await interaction.reply("No music queue found for this server.");
 		return;
 	}
@@ -194,8 +194,8 @@ async function _handleNowPlaying(
 
 async function _handlePlaySong(
 	interaction: ChatInputCommandInteraction<CacheType>,
-	queue: Queue,
-	queues: Map<string, Queue>,
+	queue?: Queue,
+	queues?: Map<string, Queue>,
 ): Promise<void> {
 	try {
 		if (!interaction?.guildId) {
@@ -216,7 +216,7 @@ async function _handlePlaySong(
 		const songInfo = await _getSongInfo(url, interaction);
 		if (!songInfo) return;
 
-		if (!queue) {
+		if (!queue || !queues) {
 			const created = await _createQueueAndJoin(
 				interaction,
 				memberVoiceChannel,
@@ -234,14 +234,14 @@ async function _handlePlaySong(
 			}
 		}
 
-		const currentQueue = queues.get(interaction.guildId);
+		const currentQueue = queues?.get(interaction.guildId);
 		if (!currentQueue) {
 			await interaction.reply("❌ Failed to create or retrieve queue.");
 			return;
 		}
 
 		await playSong(interaction, currentQueue, (guildId) => {
-			queues.delete(guildId);
+			queues?.delete(guildId);
 		});
 	} catch (error) {
 		await _handlePlaySongError(error, interaction, queues);
@@ -273,9 +273,9 @@ async function _createQueueAndJoin(
 	interaction: ChatInputCommandInteraction<CacheType>,
 	memberVoiceChannel: VoiceBasedChannel,
 	songInfo: Song,
-	queues: Map<string, Queue>,
+	queues?: Map<string, Queue>,
 ): Promise<boolean> {
-	if (!interaction.guild) {
+	if (!interaction.guild || !interaction.guildId) {
 		await interaction.reply("This command can only be used in a server.");
 		return false;
 	}
@@ -300,7 +300,7 @@ async function _createQueueAndJoin(
 		paused: false,
 	};
 
-	queues.set(interaction.guildId, newQueue);
+	queues?.set(interaction.guildId, newQueue);
 	connection.subscribe(player);
 	return true;
 }
@@ -314,7 +314,7 @@ async function _addSongToQueue(
 	queue.songs.push(songInfo);
 	await interaction.reply(`🎵 Added to queue: **${songInfo.title}**`);
 
-	if (!queue.playing) {
+	if (!queue.playing && interaction.guildId) {
 		const currentQueue = queues.get(interaction.guildId);
 		if (!currentQueue) {
 			await interaction.followUp("❌ Failed to retrieve queue.");
@@ -331,7 +331,7 @@ async function _addSongToQueue(
 async function _handlePlaySongError(
 	error: unknown,
 	interaction: ChatInputCommandInteraction<CacheType>,
-	queues: Map<string, Queue>,
+	queues?: Map<string, Queue>,
 ): Promise<void> {
 	console.error("Error in _playSong:", error);
 	try {
@@ -354,7 +354,7 @@ async function _handlePlaySongError(
 
 	if (interaction.guildId) {
 		try {
-			const partialQueue = queues.get(interaction.guildId);
+			const partialQueue = queues?.get(interaction.guildId);
 			if (partialQueue) {
 				partialQueue.player.stop();
 				if (
@@ -363,7 +363,7 @@ async function _handlePlaySongError(
 				) {
 					partialQueue.connection.destroy();
 				}
-				queues.delete(interaction.guildId);
+				queues?.delete(interaction.guildId);
 			}
 		} catch (cleanupError) {
 			console.error("Error during cleanup in _playSong:", cleanupError);
@@ -396,57 +396,57 @@ export async function registerCommands(): Promise<void> {
 }
 
 export async function handleCommand(
-	interaction: ChatInputCommandInteraction<CacheType>,
-	queue: Queue,
-	queues: Map<string, Queue>,
-): Promise<void> {
-	try {
-		switch (interaction.commandName) {
-			case "ping":
-				await _handlePing(interaction);
-				break;
-			case "play":
-				await _handlePlaySong(interaction, queue, queues);
-				break;
-			case "skip":
-				await _handleSkip(interaction, queue);
-				break;
-			case "pause":
-				await _handlePause(interaction, queue);
-				break;
-			case "resume":
-				await _handleResume(interaction, queue);
-				break;
-			case "stop":
-				await _handleStop(interaction, queue, queues);
-				break;
-			case "queue":
-				await _handleQueue(interaction, queue);
-				break;
-			case "nowplaying":
-				await _handleNowPlaying(interaction, queue);
-				break;
-		}
-	} catch (error) {
-		console.error("Error in handleCommand:", error);
+		interaction: ChatInputCommandInteraction<CacheType>,
+		queue?: Queue,
+		queues?: Map<string, Queue>,
+	): Promise<void> {
 		try {
-			if (interaction.isChatInputCommand()) {
-				if (!interaction.replied && !interaction.deferred) {
-					await interaction.reply(
-						"❌ An unexpected error occurred. Please try again.",
-					);
-				} else if (interaction.deferred) {
-					await interaction.editReply(
-						"❌ An unexpected error occurred. Please try again.",
-					);
-				} else {
-					await interaction.followUp(
-						"❌ An unexpected error occurred. Please try again.",
-					);
-				}
+			switch (interaction.commandName) {
+				case "ping":
+					await _handlePing(interaction);
+					break;
+				case "play":
+					await _handlePlaySong(interaction, queue, queues);
+					break;
+				case "skip":
+					await _handleSkip(interaction, queue);
+					break;
+				case "pause":
+					await _handlePause(interaction, queue);
+					break;
+				case "resume":
+					await _handleResume(interaction, queue);
+					break;
+				case "stop":
+					await _handleStop(interaction, queue, queues);
+					break;
+				case "queue":
+					await _handleQueue(interaction, queue);
+					break;
+				case "nowplaying":
+					await _handleNowPlaying(interaction, queue);
+					break;
 			}
-		} catch (replyError) {
-			console.error("Error sending error message:", replyError);
+		} catch (error) {
+			console.error("Error in handleCommand:", error);
+			try {
+				if (interaction.isChatInputCommand()) {
+					if (!interaction.replied && !interaction.deferred) {
+						await interaction.reply(
+							"❌ An unexpected error occurred. Please try again.",
+						);
+					} else if (interaction.deferred) {
+						await interaction.editReply(
+							"❌ An unexpected error occurred. Please try again.",
+						);
+					} else {
+						await interaction.followUp(
+							"❌ An unexpected error occurred. Please try again.",
+						);
+					}
+				}
+			} catch (replyError) {
+				console.error("Error sending error message:", replyError);
+			}
 		}
 	}
-}

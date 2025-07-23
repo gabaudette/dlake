@@ -31,7 +31,7 @@ client.on("interactionCreate", async (interaction) => {
 		if (!interaction.isCommand()) {
 			return;
 		}
-
+		
 		if (!interaction.isChatInputCommand() || !interaction?.guildId) {
 			await interaction.reply(
 				"This command can only be used as a chat input command or in a server.",

@@ -47,11 +47,9 @@ A private Discord music bot (my first) built as a hobby project for learning pur
    ```bash
    npm install
    ```
-3. Create a `.env` file with your Discord bot token & application credentials:
+3. Create a `.env` file with your Discord bot token:
    ```
-   DISCORD_TOKEN=
-   CLIENT_ID=
-   GUILD_ID=
+   DISCORD_TOKEN=your_bot_token_here
    ```
 4. Build the project:
    ```bash
@@ -64,8 +62,24 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 
 ## Development
 
-- `npm run dev` - Start in development mode with auto-reload
-- `npm run build` - Compile TypeScript to JavaScript
+- `npm run build` - Build the project using Rollup
+- `npm start` - Start the built bot
+- `npm run clean` - Clean the build directory
+
+## Build System
+
+This project uses **Rollup** for building and bundling:
+
+- **TypeScript compilation** with source maps
+- **Tree shaking** for smaller bundle sizes
+- **External dependencies** are not bundled (kept in node_modules)
+- **Source maps** for easier debugging
+
+The build process:
+1. Compiles TypeScript to JavaScript
+2. Resolves imports and dependencies
+3. Creates an optimized bundle in the `dist/` directory
+4. Copies configuration files
 
 ## Project Structure
 
