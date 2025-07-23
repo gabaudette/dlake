@@ -24,8 +24,8 @@ export const CCommands = [
 	"pause",
 	"resume",
 	"queue",
-	"clear",
 	"nowplaying",
+	"shuffle",
 ] as const;
 
 export type Command = {

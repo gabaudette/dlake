@@ -47,19 +47,19 @@ const GLOBAL_COMMANDS: Command[] = [
 	},
 	{
 		name: "stop",
-		description: "Stop the music",
+		description: "Stop the music and clear the queue",
 	},
 	{
 		name: "queue",
 		description: "Show the queue",
 	},
 	{
-		name: "clear",
-		description: "Clear the queue",
-	},
-	{
 		name: "nowplaying",
 		description: "Show the current song",
+	},
+	{
+		name: "shuffle",
+		description: "Shuffle the queue (excluding the currently playing song)",
 	},
 ];
 
@@ -161,6 +161,33 @@ async function _handleStop(
 	await interaction.reply("Stopped the music and cleared the queue.");
 }
 
+async function _handleShuffle(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue | undefined,
+): Promise<void> {
+	if (!queue) {
+		await interaction.reply("No music queue found for this server.");
+		return;
+	}
+	if (queue.songs.length <= 1) {
+		await interaction.reply("Not enough songs in the queue to shuffle.");
+		return;
+	}
+
+	const currentSong = queue.songs[0]; // Keep the currently playing song
+	const remainingSongs = queue.songs.slice(1); // Get songs to shuffle
+	const SHUFFLE_RANDOM_THRESHOLD = 0.5;
+	remainingSongs.sort(() => Math.random() - SHUFFLE_RANDOM_THRESHOLD);
+
+	// Update the actual queue with shuffled songs
+	queue.songs = [currentSong, ...remainingSongs];
+
+	await interaction.reply(
+		"🔀 Shuffled the queue. Here is the new order:\n" +
+			remainingSongs.map((s, i) => `${i + 1}. ${s.title}`).join("\n"),
+	);
+}
+
 async function _handleQueue(
 	interaction: ChatInputCommandInteraction<CacheType>,
 	queue: Queue | undefined,
@@ -173,7 +200,13 @@ async function _handleQueue(
 	if (queue.songs.length === 0) {
 		await interaction.reply("The queue is empty.");
 	} else {
-		const list = queue.songs.map((s, i) => `${i + 1}. ${s.title}`).join("\n");
+		const tempsSong = queue.songs.slice(1);
+		if (tempsSong.length === 0) {
+			// Exclude the currently playing song
+			await interaction.reply("The queue is empty after the current song.");
+			return;
+		}
+		const list = tempsSong.map((s, i) => `${i + 1}. ${s.title}`).join("\n");
 		await interaction.reply(`📜 **Queue:**\n${list}`);
 	}
 }
@@ -425,6 +458,14 @@ export async function handleCommand(
 				break;
 			case "nowplaying":
 				await _handleNowPlaying(interaction, queue);
+				break;
+			case "shuffle":
+				await _handleShuffle(interaction, queue);
+				break;
+			default:
+				await interaction.reply(
+					"❌ Unknown command. Please use a valid command.",
+				);
 				break;
 		}
 	} catch (error) {
