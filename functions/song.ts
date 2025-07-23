@@ -15,6 +15,11 @@ if (ffmpegPath) {
 	process.env.FFMPEG_PATH = ffmpegPath;
 }
 
+const LEAVE_DELAY_MS = 60_000; // 60 seconds
+const MILLISECONDS_TO_SECONDS = 1000;
+
+const leaveTimeouts: Map<string, NodeJS.Timeout> = new Map();
+
 async function _handleEmptyQueue(
 	interaction: ChatInputCommandInteraction<CacheType>,
 	queue: Queue,
@@ -28,10 +33,10 @@ async function _handleEmptyQueue(
 	}
 	try {
 		if (queue.connection.state.status !== VoiceConnectionStatus.Destroyed) {
-			queue.connection.destroy();
+			delayedLeaveChannel(queue);
 		}
 	} catch (error) {
-		console.error("Error destroying connection:", error);
+		console.error("Error scheduling delayed leave:", error);
 	}
 	if (onQueueEmpty && interaction.guildId) {
 		try {
@@ -59,10 +64,10 @@ async function _handleNoSong(
 
 	try {
 		if (queue.connection.state.status !== VoiceConnectionStatus.Destroyed) {
-			queue.connection.destroy();
+			delayedLeaveChannel(queue);
 		}
 	} catch (error) {
-		console.error("Error destroying connection:", error);
+		console.error("Error scheduling delayed leave:", error);
 	}
 
 	if (onQueueEmpty && interaction.guildId) {
@@ -94,10 +99,10 @@ async function _handleInvalidUrl(
 
 	try {
 		if (queue.connection.state.status !== VoiceConnectionStatus.Destroyed) {
-			queue.connection.destroy();
+			delayedLeaveChannel(queue);
 		}
 	} catch (destroyError) {
-		console.error("Error destroying connection:", destroyError);
+		console.error("Error scheduling delayed leave:", destroyError);
 	}
 
 	if (onQueueEmpty && interaction.guildId) {
@@ -138,6 +143,8 @@ async function _playAudio(
 	queue.playing = true;
 	queue.paused = false;
 
+	cancelDelayedLeave(queue);
+
 	queue.player.on(AudioPlayerStatus.Playing, () => {
 		console.log("Player is now playing!");
 	});
@@ -168,10 +175,10 @@ function _handlePlayerIdle(
 
 		try {
 			if (queue.connection.state.status !== VoiceConnectionStatus.Destroyed) {
-				queue.connection.destroy();
+				delayedLeaveChannel(queue);
 			}
 		} catch (error) {
-			console.error("Error destroying connection:", error);
+			console.error("Error scheduling delayed leave:", error);
 		}
 
 		if (onQueueEmpty && interaction.guildId) {
@@ -202,10 +209,10 @@ function _handlePlayerError(
 
 		try {
 			if (queue.connection.state.status !== VoiceConnectionStatus.Destroyed) {
-				queue.connection.destroy();
+				delayedLeaveChannel(queue);
 			}
 		} catch (e) {
-			console.error("Error destroying connection:", e);
+			console.error("Error scheduling delayed leave:", e);
 		}
 
 		if (onQueueEmpty && interaction.guildId) {
@@ -236,10 +243,10 @@ async function _handlePlayError(
 
 	try {
 		if (queue.connection.state.status !== VoiceConnectionStatus.Destroyed) {
-			queue.connection.destroy();
+			delayedLeaveChannel(queue);
 		}
 	} catch (e) {
-		console.error("Error destroying connection:", e);
+		console.error("Error scheduling delayed leave:", e);
 	}
 
 	if (onQueueEmpty && interaction.guildId) {
@@ -252,6 +259,8 @@ export async function playSong(
 	queue: Queue,
 	onQueueEmpty?: (guildId: string) => void,
 ): Promise<void> {
+	cancelDelayedLeave(queue);
+
 	if (queue.songs.length === 0) {
 		await _handleEmptyQueue(interaction, queue, onQueueEmpty);
 		return;
@@ -272,5 +281,48 @@ export async function playSong(
 		await _playAudio(interaction, queue, onQueueEmpty, song);
 	} catch (error) {
 		await _handlePlayError(interaction, queue, onQueueEmpty, error);
+	}
+}
+export function delayedLeaveChannel(queue: Queue): void {
+	const channelId = queue.voiceChannelId;
+	const existingTimeout = leaveTimeouts.get(channelId);
+	if (existingTimeout) {
+		clearTimeout(existingTimeout);
+		leaveTimeouts.delete(channelId);
+	}
+
+	console.log(
+		`Queue finished. Leaving voice channel in ${LEAVE_DELAY_MS / MILLISECONDS_TO_SECONDS} seconds...`,
+	);
+
+	const timeout = setTimeout(() => {
+		console.log(`Timeout executed for channel:`, channelId);
+		try {
+			if (
+				queue.connection.state.status !== VoiceConnectionStatus.Destroyed &&
+				queue.connection &&
+				queue.songs.length === 0 &&
+				!queue.playing
+			) {
+				queue.connection.destroy();
+				console.log("Left voice channel after delay.");
+			}
+		} catch (error) {
+			console.error("Error destroying connection after delay:", error);
+		} finally {
+			leaveTimeouts.delete(channelId);
+		}
+	}, LEAVE_DELAY_MS);
+
+	leaveTimeouts.set(channelId, timeout);
+}
+export function cancelDelayedLeave(queue: Queue): void {
+	const channelId = queue.voiceChannelId;
+	const timeout = leaveTimeouts.get(channelId);
+
+	if (timeout) {
+		clearTimeout(timeout);
+		leaveTimeouts.delete(channelId);
+		console.log(`Cancelled timeout for channel:`, channelId);
 	}
 }

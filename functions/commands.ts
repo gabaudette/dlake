@@ -26,7 +26,7 @@ import {
 	type VoiceBasedChannel,
 } from "discord.js";
 import type { Command, Queue, Song } from "../types/types";
-import { playSong } from "./song";
+import { cancelDelayedLeave, delayedLeaveChannel, playSong } from "./song";
 
 const GLOBAL_COMMANDS: Command[] = [
 	{
@@ -141,6 +141,9 @@ async function _handleResume(
 
 	queue.player.unpause();
 	queue.paused = false;
+
+	cancelDelayedLeave(queue);
+
 	await interaction.reply("Resumed the current song.");
 }
 
@@ -156,6 +159,7 @@ async function _handleStop(
 
 	queue.songs = [];
 	queue.player.stop();
+	cancelDelayedLeave(queue);
 	queues?.delete(interaction.guildId);
 
 	await interaction.reply("Stopped the music and cleared the queue.");
@@ -174,12 +178,10 @@ async function _handleShuffle(
 		return;
 	}
 
-	const currentSong = queue.songs[0]; // Keep the currently playing song
-	const remainingSongs = queue.songs.slice(1); // Get songs to shuffle
+	const currentSong = queue.songs[0];
+	const remainingSongs = queue.songs.slice(1);
 	const SHUFFLE_RANDOM_THRESHOLD = 0.5;
 	remainingSongs.sort(() => Math.random() - SHUFFLE_RANDOM_THRESHOLD);
-
-	// Update the actual queue with shuffled songs
 	queue.songs = [currentSong, ...remainingSongs];
 
 	await interaction.reply(
@@ -202,7 +204,6 @@ async function _handleQueue(
 	} else {
 		const tempsSong = queue.songs.slice(1);
 		if (tempsSong.length === 0) {
-			// Exclude the currently playing song
 			await interaction.reply("The queue is empty after the current song.");
 			return;
 		}
@@ -260,22 +261,26 @@ async function _handlePlaySong(
 			if (!created) {
 				return;
 			}
+
+			const newQueue = queues?.get(interaction.guildId);
+			if (!newQueue) {
+				await interaction.reply("❌ Failed to create queue.");
+				return;
+			}
+
+			await playSong(interaction, newQueue, (guildId) => {
+				queues?.delete(guildId);
+			});
 		} else {
-			const added = await _addSongToQueue(interaction, queue, songInfo, queues);
+			const added = await _addSongToQueue(interaction, queue, songInfo);
 			if (!added) {
 				return;
 			}
-		}
 
-		const currentQueue = queues?.get(interaction.guildId);
-		if (!currentQueue) {
-			await interaction.reply("❌ Failed to create or retrieve queue.");
-			return;
+			await playSong(interaction, queue, (guildId) => {
+				queues?.delete(guildId);
+			});
 		}
-
-		await playSong(interaction, currentQueue, (guildId) => {
-			queues?.delete(guildId);
-		});
 	} catch (error) {
 		await _handlePlaySongError(error, interaction, queues);
 	}
@@ -342,23 +347,14 @@ async function _addSongToQueue(
 	interaction: ChatInputCommandInteraction<CacheType>,
 	queue: Queue,
 	songInfo: Song,
-	queues: Map<string, Queue>,
 ): Promise<boolean> {
 	queue.songs.push(songInfo);
+
+	cancelDelayedLeave(queue);
+
 	await interaction.reply(`🎵 Added to queue: **${songInfo.title}**`);
 
-	if (!queue.playing && interaction.guildId) {
-		const currentQueue = queues.get(interaction.guildId);
-		if (!currentQueue) {
-			await interaction.followUp("❌ Failed to retrieve queue.");
-			return false;
-		}
-
-		await playSong(interaction, currentQueue, (guildId) => {
-			queues.delete(guildId);
-		});
-	}
-	return false;
+	return true;
 }
 
 async function _handlePlaySongError(
@@ -394,7 +390,7 @@ async function _handlePlaySongError(
 					partialQueue.connection.state.status !==
 					VoiceConnectionStatus.Destroyed
 				) {
-					partialQueue.connection.destroy();
+					delayedLeaveChannel(partialQueue);
 				}
 				queues?.delete(interaction.guildId);
 			}
