@@ -180,59 +180,18 @@ async function _handlePlaySong(interaction, queue, queues) {
             await interaction.reply("You need to be in a voice channel to play music.");
             return;
         }
-        let songInfo;
-        try {
-            const info = await ytdl_core_1.default.getInfo(url);
-            songInfo = {
-                title: info.videoDetails.title ??
-                    "An unknown youtube video (probably an obscured one you can't play anyway)",
-                url,
-            };
-        }
-        catch (error) {
-            console.error("Error fetching video info:", error);
-            await interaction.reply("❌ Failed to retrieve video information. Please check the URL and try again.");
+        const songInfo = await _getSongInfo(url, interaction);
+        if (!songInfo)
             return;
-        }
         if (!queue) {
-            if (!interaction.guild) {
-                await interaction.reply("This command can only be used in a server.");
+            const created = await _createQueueAndJoin(interaction, memberVoiceChannel, songInfo, queues);
+            if (!created)
                 return;
-            }
-            const connection = (0, voice_1.joinVoiceChannel)({
-                channelId: memberVoiceChannel.id,
-                guildId: interaction.guildId,
-                adapterCreator: interaction.guild.voiceAdapterCreator,
-            });
-            const player = (0, voice_1.createAudioPlayer)({
-                behaviors: { noSubscriber: voice_1.NoSubscriberBehavior.Pause },
-            });
-            const newQueue = {
-                textChannel: interaction.channel,
-                voiceChannelId: memberVoiceChannel.id,
-                connection,
-                player,
-                songs: [songInfo],
-                playing: false,
-                paused: false,
-            };
-            queues.set(interaction.guildId, newQueue);
-            connection.subscribe(player);
         }
         else {
-            queue.songs.push(songInfo);
-            await interaction.reply(`🎵 Added to queue: **${songInfo.title}**`);
-            if (!queue.playing) {
-                const currentQueue = queues.get(interaction.guildId);
-                if (!currentQueue) {
-                    await interaction.followUp("❌ Failed to retrieve queue.");
-                    return;
-                }
-                await (0, song_1.playSong)(interaction, currentQueue, (guildId) => {
-                    queues.delete(guildId);
-                });
-            }
-            return;
+            const added = await _addSongToQueue(interaction, queue, songInfo, queues);
+            if (!added)
+                return;
         }
         const currentQueue = queues.get(interaction.guildId);
         if (!currentQueue) {
@@ -244,36 +203,95 @@ async function _handlePlaySong(interaction, queue, queues) {
         });
     }
     catch (error) {
-        console.error("Error in _playSong:", error);
+        await _handlePlaySongError(error, interaction, queues);
+    }
+}
+async function _getSongInfo(url, interaction) {
+    try {
+        const info = await ytdl_core_1.default.getInfo(url);
+        return {
+            title: info.videoDetails.title ??
+                "An unknown youtube video (probably an obscured one you can't play anyway)",
+            url,
+        };
+    }
+    catch (error) {
+        console.error("Error fetching video info:", error);
+        await interaction.reply("❌ Failed to retrieve video information. Please check the URL and try again.");
+        return null;
+    }
+}
+async function _createQueueAndJoin(interaction, memberVoiceChannel, songInfo, queues) {
+    if (!interaction.guild) {
+        await interaction.reply("This command can only be used in a server.");
+        return false;
+    }
+    const connection = (0, voice_1.joinVoiceChannel)({
+        channelId: memberVoiceChannel.id,
+        guildId: interaction.guildId,
+        adapterCreator: interaction.guild.voiceAdapterCreator,
+    });
+    const player = (0, voice_1.createAudioPlayer)({
+        behaviors: { noSubscriber: voice_1.NoSubscriberBehavior.Pause },
+    });
+    const newQueue = {
+        textChannel: interaction.channel,
+        voiceChannelId: memberVoiceChannel.id,
+        connection,
+        player,
+        songs: [songInfo],
+        playing: false,
+        paused: false,
+    };
+    queues.set(interaction.guildId, newQueue);
+    connection.subscribe(player);
+    return true;
+}
+async function _addSongToQueue(interaction, queue, songInfo, queues) {
+    queue.songs.push(songInfo);
+    await interaction.reply(`🎵 Added to queue: **${songInfo.title}**`);
+    if (!queue.playing) {
+        const currentQueue = queues.get(interaction.guildId);
+        if (!currentQueue) {
+            await interaction.followUp("❌ Failed to retrieve queue.");
+            return false;
+        }
+        await (0, song_1.playSong)(interaction, currentQueue, (guildId) => {
+            queues.delete(guildId);
+        });
+    }
+    return false;
+}
+async function _handlePlaySongError(error, interaction, queues) {
+    console.error("Error in _playSong:", error);
+    try {
+        if (!interaction.replied && !interaction.deferred) {
+            await interaction.reply("❌ An unexpected error occurred while processing your request. Please try again.");
+        }
+        else if (interaction.deferred) {
+            await interaction.editReply("❌ An unexpected error occurred while processing your request. Please try again.");
+        }
+        else {
+            await interaction.followUp("❌ An unexpected error occurred while processing your request. Please try again.");
+        }
+    }
+    catch (replyError) {
+        console.error("Error sending error message in _playSong:", replyError);
+    }
+    if (interaction.guildId) {
         try {
-            if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply("❌ An unexpected error occurred while processing your request. Please try again.");
-            }
-            else if (interaction.deferred) {
-                await interaction.editReply("❌ An unexpected error occurred while processing your request. Please try again.");
-            }
-            else {
-                await interaction.followUp("❌ An unexpected error occurred while processing your request. Please try again.");
-            }
-        }
-        catch (replyError) {
-            console.error("Error sending error message in _playSong:", replyError);
-        }
-        if (interaction.guildId) {
-            try {
-                const partialQueue = queues.get(interaction.guildId);
-                if (partialQueue) {
-                    partialQueue.player.stop();
-                    if (partialQueue.connection.state.status !==
-                        voice_1.VoiceConnectionStatus.Destroyed) {
-                        partialQueue.connection.destroy();
-                    }
-                    queues.delete(interaction.guildId);
+            const partialQueue = queues.get(interaction.guildId);
+            if (partialQueue) {
+                partialQueue.player.stop();
+                if (partialQueue.connection.state.status !==
+                    voice_1.VoiceConnectionStatus.Destroyed) {
+                    partialQueue.connection.destroy();
                 }
+                queues.delete(interaction.guildId);
             }
-            catch (cleanupError) {
-                console.error("Error during cleanup in _playSong:", cleanupError);
-            }
+        }
+        catch (cleanupError) {
+            console.error("Error during cleanup in _playSong:", cleanupError);
         }
     }
 }
