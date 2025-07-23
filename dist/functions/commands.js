@@ -185,13 +185,15 @@ async function _handlePlaySong(interaction, queue, queues) {
             return;
         if (!queue) {
             const created = await _createQueueAndJoin(interaction, memberVoiceChannel, songInfo, queues);
-            if (!created)
+            if (!created) {
                 return;
+            }
         }
         else {
             const added = await _addSongToQueue(interaction, queue, songInfo, queues);
-            if (!added)
+            if (!added) {
                 return;
+            }
         }
         const currentQueue = queues.get(interaction.guildId);
         if (!currentQueue) {

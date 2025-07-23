@@ -106,6 +106,7 @@ async function _handleSkip(
 		await interaction.reply("No music queue found for this server.");
 		return;
 	}
+
 	queue.player.stop();
 	await interaction.reply("Skipped the current song.");
 }
@@ -118,6 +119,7 @@ async function _handlePause(
 		await interaction.reply("No music queue found for this server.");
 		return;
 	}
+
 	queue.player.pause();
 	queue.paused = true;
 	await interaction.reply("Paused the current song.");
@@ -131,10 +133,12 @@ async function _handleResume(
 		await interaction.reply("No music queue found for this server.");
 		return;
 	}
+
 	if (!queue.paused) {
 		await interaction.reply("▶️ Not paused.");
 		return;
 	}
+
 	queue.player.unpause();
 	queue.paused = false;
 	await interaction.reply("Resumed the current song.");
@@ -149,9 +153,11 @@ async function _handleStop(
 		await interaction.reply("No music queue found for this server.");
 		return;
 	}
+
 	queue.songs = [];
 	queue.player.stop();
 	queues?.delete(interaction.guildId);
+
 	await interaction.reply("Stopped the music and cleared the queue.");
 }
 
@@ -163,6 +169,7 @@ async function _handleQueue(
 		await interaction.reply("No music queue found for this server.");
 		return;
 	}
+
 	if (queue.songs.length === 0) {
 		await interaction.reply("The queue is empty.");
 	} else {
@@ -179,6 +186,7 @@ async function _handleNowPlaying(
 		await interaction.reply("No music queue found for this server.");
 		return;
 	}
+
 	await interaction.reply(
 		`🎶 Now playing: **${queue.songs[0]?.title || "Nothing"}**`,
 	);
@@ -215,10 +223,15 @@ async function _handlePlaySong(
 				songInfo,
 				queues,
 			);
-			if (!created) return;
+
+			if (!created) {
+				return;
+			}
 		} else {
 			const added = await _addSongToQueue(interaction, queue, songInfo, queues);
-			if (!added) return;
+			if (!added) {
+				return;
+			}
 		}
 
 		const currentQueue = queues.get(interaction.guildId);
