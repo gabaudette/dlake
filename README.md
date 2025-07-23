@@ -37,7 +37,7 @@ A private Discord music bot built as a hobby project for learning purposes and u
 ## Prerequisites
 
 - Node.js 18+ 
-- Discord Bot Token
+- Discord Bot Token & Application Credentials
 - FFmpeg installed on your system
 
 ## Installation
@@ -47,9 +47,11 @@ A private Discord music bot built as a hobby project for learning purposes and u
    ```bash
    npm install
    ```
-3. Create a `.env` file with your Discord bot token:
+3. Create a `.env` file with your Discord bot token & application credentials:
    ```
-   DISCORD_TOKEN=your_bot_token_here
+   DISCORD_TOKEN=
+   CLIENT_ID=
+   GUILD_ID=
    ```
 4. Build the project:
    ```bash
