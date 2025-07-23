@@ -1,6 +1,6 @@
 # DLake Discord Bot
 
-A private Discord music bot built as a hobby project for learning purposes and use among friends in private Discord servers.
+A private Discord music bot (my first) built as a hobby project for learning purposes and use among friends in private Discord servers.
 
 ## ⚠️ Important Legal Disclaimer
 
