@@ -1,11 +1,31 @@
+// biome-ignore lint/nursery/noUnresolvedImports: This is necessary for assertions
+// biome-ignore lint/style/useNodejsImportProtocol: This is necessary for assertions
 import { assert } from "console";
+
+// biome-ignore lint/nursery/noUnresolvedImports: This import is necessary for environment variable management
 import dotenv from "dotenv";
+
 dotenv.config();
+
+// biome-ignore lint/nursery/noUnresolvedImports: This import is necessary for environment variable management
+import process from "node:process";
 import {
+	createAudioPlayer,
+	joinVoiceChannel,
+	NoSubscriberBehavior,
+	VoiceConnectionStatus,
+} from "@discordjs/voice";
+import ytdl from "@distube/ytdl-core";
+import {
+	type CacheType,
+	type ChatInputCommandInteraction,
+	type GuildMember,
 	type RESTPostAPIChatInputApplicationCommandsJSONBody,
 	SlashCommandBuilder,
+	type TextChannel,
 } from "discord.js";
-import type { Command } from "../types/types";
+import type { Command, Queue, Song } from "../types/types";
+import { playSong } from "./song";
 
 const GLOBAL_COMMANDS: Command[] = [
 	{
@@ -68,6 +88,234 @@ function buildCommands(): RESTPostAPIChatInputApplicationCommandsJSONBody[] {
 	return newCommands.map((command) => command.toJSON());
 }
 
+async function _handlePing(
+	interaction: ChatInputCommandInteraction<CacheType>,
+): Promise<void> {
+	console.log("Pong command received.");
+	await interaction.reply(
+		"🏓 Pong! Bot is working correctly... << DLake official sound ! >>",
+	);
+}
+
+async function _handleSkip(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue | undefined,
+): Promise<void> {
+	if (!queue) {
+		await interaction.reply("No music queue found for this server.");
+		return;
+	}
+	queue.player.stop();
+	await interaction.reply("Skipped the current song.");
+}
+
+async function _handlePause(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue | undefined,
+): Promise<void> {
+	if (!queue) {
+		await interaction.reply("No music queue found for this server.");
+		return;
+	}
+	queue.player.pause();
+	queue.paused = true;
+	await interaction.reply("Paused the current song.");
+}
+
+async function _handleResume(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue | undefined,
+): Promise<void> {
+	if (!queue) {
+		await interaction.reply("No music queue found for this server.");
+		return;
+	}
+	if (!queue.paused) {
+		await interaction.reply("▶️ Not paused.");
+		return;
+	}
+	queue.player.unpause();
+	queue.paused = false;
+	await interaction.reply("Resumed the current song.");
+}
+
+async function _handleStop(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue | undefined,
+	queues: Map<string, Queue>,
+): Promise<void> {
+	if (!queue) {
+		await interaction.reply("No music queue found for this server.");
+		return;
+	}
+	queue.songs = [];
+	queue.player.stop();
+	queues?.delete(interaction.guildId);
+	await interaction.reply("Stopped the music and cleared the queue.");
+}
+
+async function _handleQueue(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue | undefined,
+): Promise<void> {
+	if (!queue) {
+		await interaction.reply("No music queue found for this server.");
+		return;
+	}
+	if (queue.songs.length === 0) {
+		await interaction.reply("The queue is empty.");
+	} else {
+		const list = queue.songs.map((s, i) => `${i + 1}. ${s.title}`).join("\n");
+		await interaction.reply(`📜 **Queue:**\n${list}`);
+	}
+}
+
+async function _handleNowPlaying(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue | undefined,
+): Promise<void> {
+	if (!queue) {
+		await interaction.reply("No music queue found for this server.");
+		return;
+	}
+	await interaction.reply(
+		`🎶 Now playing: **${queue.songs[0]?.title || "Nothing"}**`,
+	);
+}
+
+async function _handlePlaySong(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue,
+	queues: Map<string, Queue>,
+): Promise<void> {
+	try {
+		if (!interaction?.guildId) {
+			await interaction?.reply("This command can only be used in a server.");
+			return;
+		}
+
+		const url = interaction.options.getString("url", true);
+		const member = interaction.member as GuildMember;
+		const memberVoiceChannel = member.voice?.channel;
+		if (!memberVoiceChannel) {
+			await interaction.reply(
+				"You need to be in a voice channel to play music.",
+			);
+			return;
+		}
+		let songInfo: Song;
+
+		try {
+			const info = await ytdl.getInfo(url);
+			songInfo = {
+				title:
+					info.videoDetails.title ??
+					"An unknown youtube video (probably an obscured one you can't play anyway)",
+				url,
+			};
+		} catch (error) {
+			console.error("Error fetching video info:", error);
+			await interaction.reply(
+				"❌ Failed to retrieve video information. Please check the URL and try again.",
+			);
+			return;
+		}
+
+		if (!queue) {
+			if (!interaction.guild) {
+				await interaction.reply("This command can only be used in a server.");
+				return;
+			}
+
+			const connection = joinVoiceChannel({
+				channelId: memberVoiceChannel.id,
+				guildId: interaction.guildId,
+				adapterCreator: interaction.guild.voiceAdapterCreator,
+			});
+
+			const player = createAudioPlayer({
+				behaviors: { noSubscriber: NoSubscriberBehavior.Pause },
+			});
+
+			const newQueue: Queue = {
+				textChannel: interaction.channel as TextChannel,
+				voiceChannelId: memberVoiceChannel.id,
+				connection,
+				player,
+				songs: [songInfo],
+				playing: false,
+				paused: false,
+			};
+
+			queues.set(interaction.guildId, newQueue);
+			connection.subscribe(player);
+		} else {
+			queue.songs.push(songInfo);
+			await interaction.reply(`🎵 Added to queue: **${songInfo.title}**`);
+
+			if (!queue.playing) {
+				const currentQueue = queues.get(interaction.guildId);
+				if (!currentQueue) {
+					await interaction.followUp("❌ Failed to retrieve queue.");
+					return;
+				}
+
+				await playSong(interaction, currentQueue, (guildId) => {
+					queues.delete(guildId);
+				});
+			}
+			return;
+		}
+
+		const currentQueue = queues.get(interaction.guildId);
+		if (!currentQueue) {
+			await interaction.reply("❌ Failed to create or retrieve queue.");
+			return;
+		}
+
+		await playSong(interaction, currentQueue, (guildId) => {
+			queues.delete(guildId);
+		});
+	} catch (error) {
+		console.error("Error in _playSong:", error);
+		try {
+			if (!interaction.replied && !interaction.deferred) {
+				await interaction.reply(
+					"❌ An unexpected error occurred while processing your request. Please try again.",
+				);
+			} else if (interaction.deferred) {
+				await interaction.editReply(
+					"❌ An unexpected error occurred while processing your request. Please try again.",
+				);
+			} else {
+				await interaction.followUp(
+					"❌ An unexpected error occurred while processing your request. Please try again.",
+				);
+			}
+		} catch (replyError) {
+			console.error("Error sending error message in _playSong:", replyError);
+		}
+
+		if (interaction.guildId) {
+			try {
+				const partialQueue = queues.get(interaction.guildId);
+				if (partialQueue) {
+					partialQueue.player.stop();
+					if (
+						partialQueue.connection.state.status !==
+						VoiceConnectionStatus.Destroyed
+					) {
+						partialQueue.connection.destroy();
+					}
+					queues.delete(interaction.guildId);
+				}
+			} catch (cleanupError) {
+				console.error("Error during cleanup in _playSong:", cleanupError);
+			}
+		}
+	}
+}
+
 export async function registerCommands(): Promise<void> {
 	const commands = buildCommands();
 
@@ -89,5 +337,61 @@ export async function registerCommands(): Promise<void> {
 		);
 	} catch (error) {
 		console.error("Error registering commands:", error);
+	}
+}
+
+export async function handleCommand(
+	interaction: ChatInputCommandInteraction<CacheType>,
+	queue: Queue,
+	queues: Map<string, Queue>,
+): Promise<void> {
+	try {
+		switch (interaction.commandName) {
+			case "ping":
+				await _handlePing(interaction);
+				break;
+			case "play":
+				await _handlePlaySong(interaction, queue, queues);
+				break;
+			case "skip":
+				await _handleSkip(interaction, queue);
+				break;
+			case "pause":
+				await _handlePause(interaction, queue);
+				break;
+			case "resume":
+				await _handleResume(interaction, queue);
+				break;
+			case "stop":
+				await _handleStop(interaction, queue, queues);
+				break;
+			case "queue":
+				await _handleQueue(interaction, queue);
+				break;
+			case "nowplaying":
+				await _handleNowPlaying(interaction, queue);
+				break;
+		}
+	} catch (error) {
+		console.error("Error in handleCommand:", error);
+		try {
+			if (interaction.isChatInputCommand()) {
+				if (!interaction.replied && !interaction.deferred) {
+					await interaction.reply(
+						"❌ An unexpected error occurred. Please try again.",
+					);
+				} else if (interaction.deferred) {
+					await interaction.editReply(
+						"❌ An unexpected error occurred. Please try again.",
+					);
+				} else {
+					await interaction.followUp(
+						"❌ An unexpected error occurred. Please try again.",
+					);
+				}
+			}
+		} catch (replyError) {
+			console.error("Error sending error message:", replyError);
+		}
 	}
 }

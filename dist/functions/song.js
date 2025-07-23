@@ -4,13 +4,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.playSong = playSong;
+// biome-ignore lint/nursery/noUnresolvedImports: This import is necessary for environment variable management
+const node_process_1 = __importDefault(require("node:process"));
 const voice_1 = require("@discordjs/voice");
 const ytdl_core_1 = __importDefault(require("@distube/ytdl-core"));
 const ffmpeg_static_1 = __importDefault(require("ffmpeg-static"));
 if (ffmpeg_static_1.default) {
-    process.env.FFMPEG_PATH = ffmpeg_static_1.default;
+    node_process_1.default.env.FFMPEG_PATH = ffmpeg_static_1.default;
 }
-// biome-ignore lint/nursery/noExcessiveLinesPerFunction: <explanation>
 async function playSong(interaction, queue, onQueueEmpty) {
     try {
         if (queue.songs.length === 0) {

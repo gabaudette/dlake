@@ -1,19 +1,20 @@
+// biome-ignore lint/nursery/noUnresolvedImports: This import is necessary for environment variable management
+import process from "node:process";
 import {
 	AudioPlayerStatus,
 	createAudioResource,
-	VoiceConnectionStatus,
 	entersState,
+	VoiceConnectionStatus,
 } from "@discordjs/voice";
-import type { CacheType, ChatInputCommandInteraction } from "discord.js";
 import ytdl from "@distube/ytdl-core";
-import type { Queue } from "../types/types";
+import type { CacheType, ChatInputCommandInteraction } from "discord.js";
 import ffmpegPath from "ffmpeg-static";
+import type { Queue } from "../types/types";
 
 if (ffmpegPath) {
 	process.env.FFMPEG_PATH = ffmpegPath;
 }
 
-// biome-ignore lint/nursery/noExcessiveLinesPerFunction: <explanation>
 export async function playSong(
 	interaction: ChatInputCommandInteraction<CacheType>,
 	queue: Queue,

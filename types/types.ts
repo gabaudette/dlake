@@ -1,6 +1,6 @@
 import type { AudioPlayer, VoiceConnection } from "@discordjs/voice";
 import { clear } from "console";
-import { TextChannel } from "discord.js";
+import type { TextChannel } from "discord.js";
 
 export type Song = {
 	title: string;

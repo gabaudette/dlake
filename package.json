@@ -1,36 +1,36 @@
 {
-  "name": "dlake",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "build": "esbuild index.ts --bundle --platform=node --target=node18 --outfile=dist/index.js --external:play-opus --external:opusscript --external:ffmpeg-static --define:__filename=\\\"index.js\\\" --define:__dirname=\\\".\\\"",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gabaudette/dlake.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/gabaudette/dlake/issues"
-  },
-  "homepage": "https://github.com/gabaudette/dlake#readme",
-  "description": "",
-  "dependencies": {
-    "@discordjs/voice": "^0.18.0",
-    "@distube/ytdl-core": "^4.16.12",
-    "@ffmpeg-installer/ffmpeg": "^1.1.0",
-    "@types/node": "^24.1.0",
-    "discord.js": "^14.21.0",
-    "dotenv": "^17.2.0",
-    "ffmpeg-static": "^5.2.0",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.1.2",
-    "esbuild": "^0.25.8"
-  }
+	"name": "dlake",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"build": "esbuild index.ts --bundle --platform=node --target=node18 --outfile=dist/index.js --external:play-opus --external:opusscript --external:ffmpeg-static --define:__filename=\\\"index.js\\\" --define:__dirname=\\\".\\\"",
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gabaudette/dlake.git"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/gabaudette/dlake/issues"
+	},
+	"homepage": "https://github.com/gabaudette/dlake#readme",
+	"description": "",
+	"dependencies": {
+		"@discordjs/voice": "^0.18.0",
+		"@distube/ytdl-core": "^4.16.12",
+		"@ffmpeg-installer/ffmpeg": "^1.1.0",
+		"@types/node": "^24.1.0",
+		"discord.js": "^14.21.0",
+		"dotenv": "^17.2.0",
+		"ffmpeg-static": "^5.2.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.8.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.1.2",
+		"esbuild": "^0.25.8"
+	}
 }
