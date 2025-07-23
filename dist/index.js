@@ -70490,7 +70490,7 @@ var require_dist10 = __commonJS({
       resolveWorkerPath() {
         const path = this.options.workerPath;
         if (!path) {
-          return (0, import_node_path2.join)("./", "defaultWorker.js");
+          return (0, import_node_path2.join)(".", "defaultWorker.js");
         }
         if ((0, import_node_path2.isAbsolute)(path)) {
           return path;
