@@ -18,15 +18,10 @@ export class AboutCommand implements ICommand {
 	): Promise<CommandResult> {
 		return {
 			success: true,
-			message: `D'Lake - Official Sound 🤖🎶 is a Discord music bot where you 
-            can listen to your music (or others *maybe* weird videos) together with your friends!
-			To show the available commands, use **/help**.
-            \n 
-            🤓 Author: Gabriel Audette 
-			\n 
-            🔗 GitHub: https://github.com/gabaudette/dlake
-			\n
-			For more information about this bot & licensing, check [here](https://github.com/gabaudette/dlake/blob/main/README.md)`,
+			message: `D'Lake - Official Sound 🤖🎶 is a Discord music bot where you can listen to your music (or others *maybe* weird videos) together with your friends!
+- To show the available commands, use **/help**.
+- 🤓 Author: Gabriel Audette
+- ℹ️ For more information about this bot (source code, licensing, etc), check [here](https://github.com/gabaudette/dlake/blob/main/README.md)`,
 		};
 	}
 }

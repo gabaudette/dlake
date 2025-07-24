@@ -18,18 +18,17 @@ export class HelpCommand implements ICommand {
 	): Promise<CommandResult> {
 		return {
 			success: true,
-			message: `Here are the available commands: \n
-			- **/play**: To play a song from a URL. \n
-			- **/pause**: To pause the current song.\n
-            - **/resume**: To resume the paused song.\n
-			- **/skip**: To skip the current song.\n
-			- **/stop**: To stop the playback.\n
-			- **/queue**: To view the current song queue.\n
-            - **/nowplaying**: To see the currently playing song.\n
-            - **/shuffle**: To shuffle the current queue.\n
-			- **/help**: To show this help message.\n
-            - **/about**: To learn more about this bot.\n
-            `,
+			message: `Here are the available commands:
+- **/play**: To play a song from a URL.
+- **/pause**: To pause the current song.
+- **/resume**: To resume the paused song.
+- **/skip**: To skip the current song.
+- **/stop**: To stop the playback.
+- **/queue**: To view the current song queue.
+- **/nowplaying**: To see the currently playing song.
+- **/shuffle**: To shuffle the current queue.
+- **/help**: To show this help message.
+- **/about**: To learn more about this bot.`,
 		};
 	}
 }

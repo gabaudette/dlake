@@ -18,8 +18,7 @@ export class PingCommand implements ICommand {
 	): Promise<CommandResult> {
 		return {
 			success: true,
-			message:
-				"🏓 Pong! Bot is working correctly... << DLake official sound ! >>",
+			message: "🏓 Pong!",
 		};
 	}
 }
