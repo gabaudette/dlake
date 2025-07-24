@@ -1,8 +1,8 @@
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
 import type {
-	ICommand,
 	CommandContext,
 	CommandResult,
+	ICommand,
 } from "./interfaces/ICommand";
 
 export class StopCommand implements ICommand {

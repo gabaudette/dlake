@@ -4,7 +4,7 @@ import type {
 	GuildMember,
 } from "discord.js";
 import type { Queue } from "../queue/Queue";
-import type { ICommand, CommandContext } from "./interfaces/ICommand";
+import type { CommandContext, ICommand } from "./interfaces/ICommand";
 
 export class CommandHandler {
 	private readonly commands: Map<string, ICommand> = new Map();

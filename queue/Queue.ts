@@ -1,15 +1,15 @@
 import {
 	type AudioPlayer,
+	AudioPlayerStatus,
 	type AudioResource,
 	createAudioPlayer,
 	createAudioResource,
 	NoSubscriberBehavior,
 	type VoiceConnection,
-	AudioPlayerStatus,
 } from "@discordjs/voice";
+import ytdl from "@distube/ytdl-core";
 import type { TextChannel } from "discord.js";
 import type { Song } from "../types/types";
-import ytdl from "@distube/ytdl-core";
 
 export class Queue {
 	private readonly player: AudioPlayer;

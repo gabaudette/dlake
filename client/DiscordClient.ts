@@ -1,26 +1,25 @@
-import { joinVoiceChannel, type VoiceConnection } from "@discordjs/voice";
-import { GatewayIntentBits } from "discord.js";
-import { Queue } from "../queue/Queue";
-import { CommandHandler } from "../commands/CommandHandler";
-import { PingCommand } from "../commands/Ping";
-import { PlayCommand } from "../commands/Play";
-import { SkipCommand } from "../commands/Skip";
-import { PauseCommand } from "../commands/Pause";
-import { ResumeCommand } from "../commands/Resume";
-import { StopCommand } from "../commands/Stop";
-import { NowPlayingCommand } from "../commands/NowPlaying";
-import { ShowQueueCommand } from "../commands/ShowQueue";
-import { ShuffleCommand } from "../commands/Shuffle";
 // biome-ignore lint/nursery/noUnresolvedImports: This import is necessary for environment variable management
 import process from "node:process";
-
+import { joinVoiceChannel, type VoiceConnection } from "@discordjs/voice";
 import {
 	type CacheType,
 	type ChatInputCommandInteraction,
 	Client,
+	GatewayIntentBits,
 	type GuildMember,
 	type TextChannel,
 } from "discord.js";
+import { CommandHandler } from "../commands/CommandHandler";
+import { NowPlayingCommand } from "../commands/NowPlaying";
+import { PauseCommand } from "../commands/Pause";
+import { PingCommand } from "../commands/Ping";
+import { PlayCommand } from "../commands/Play";
+import { ResumeCommand } from "../commands/Resume";
+import { ShowQueueCommand } from "../commands/ShowQueue";
+import { ShuffleCommand } from "../commands/Shuffle";
+import { SkipCommand } from "../commands/Skip";
+import { StopCommand } from "../commands/Stop";
+import { Queue } from "../queue/Queue";
 
 export class DiscordClient extends Client {
 	private queue: Queue | null = null;
