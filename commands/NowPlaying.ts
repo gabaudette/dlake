@@ -8,12 +8,13 @@ import type {
 } from "./interfaces/ICommand";
 
 export class NowPlayingCommand implements ICommand {
-	getSlashCommand(): SlashCommandBuilder {
+	public getSlashCommand(): SlashCommandBuilder {
 		return new SlashCommandBuilder()
 			.setName("nowplaying")
 			.setDescription("Show the currently playing song");
 	}
-	async execute(
+
+	public async execute(
 		_interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,
 	): Promise<CommandResult> {

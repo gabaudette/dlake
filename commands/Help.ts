@@ -7,12 +7,13 @@ import type {
 } from "./interfaces/ICommand";
 
 export class HelpCommand implements ICommand {
-	getSlashCommand(): SlashCommandBuilder {
+	public getSlashCommand(): SlashCommandBuilder {
 		return new SlashCommandBuilder()
 			.setName("help")
 			.setDescription("Show all available commands");
 	}
-	async execute(
+
+	public async execute(
 		_interaction: ChatInputCommandInteraction<CacheType>,
 		_context: CommandContext,
 	): Promise<CommandResult> {

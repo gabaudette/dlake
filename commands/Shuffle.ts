@@ -8,12 +8,13 @@ import type {
 } from "./interfaces/ICommand";
 
 export class ShuffleCommand implements ICommand {
-	getSlashCommand(): SlashCommandBuilder {
+	public getSlashCommand(): SlashCommandBuilder {
 		return new SlashCommandBuilder()
 			.setName("shuffle")
 			.setDescription("Shuffle the current queue");
 	}
-	async execute(
+
+	public async execute(
 		_interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,
 	): Promise<CommandResult> {

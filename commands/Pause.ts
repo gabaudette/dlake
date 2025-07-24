@@ -7,12 +7,13 @@ import type {
 } from "./interfaces/ICommand";
 
 export class PauseCommand implements ICommand {
-	getSlashCommand(): SlashCommandBuilder {
+	public getSlashCommand(): SlashCommandBuilder {
 		return new SlashCommandBuilder()
 			.setName("pause")
 			.setDescription("Pause the current song");
 	}
-	async execute(
+
+	public async execute(
 		_interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,
 	): Promise<CommandResult> {

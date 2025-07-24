@@ -10,7 +10,7 @@ import type {
 } from "./interfaces/ICommand";
 
 export class PlayCommand implements ICommand {
-	getSlashCommand(): SlashCommandBuilder {
+	public getSlashCommand(): SlashCommandBuilder {
 		return new SlashCommandBuilder()
 			.setName("play")
 			.setDescription("Play a song from a URL")
@@ -21,7 +21,8 @@ export class PlayCommand implements ICommand {
 					.setRequired(true),
 			) as SlashCommandBuilder;
 	}
-	async execute(
+
+	public async execute(
 		interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,
 	): Promise<CommandResult> {

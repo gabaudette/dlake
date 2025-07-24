@@ -7,18 +7,19 @@ import type {
 } from "./interfaces/ICommand";
 
 export class PingCommand implements ICommand {
-	getSlashCommand(): SlashCommandBuilder {
-		return new SlashCommandBuilder()
-			.setName("ping")
-			.setDescription("Replies with pong!");
+		public getSlashCommand(): SlashCommandBuilder {
+			return new SlashCommandBuilder()
+				.setName("ping")
+				.setDescription("Replies with pong!");
+		}
+
+		public async execute(
+			_interaction: ChatInputCommandInteraction<CacheType>,
+			_context: CommandContext,
+		): Promise<CommandResult> {
+			return {
+				success: true,
+				message: "🏓 Pong!",
+			};
+		}
 	}
-	async execute(
-		_interaction: ChatInputCommandInteraction<CacheType>,
-		_context: CommandContext,
-	): Promise<CommandResult> {
-		return {
-			success: true,
-			message: "🏓 Pong!",
-		};
-	}
-}

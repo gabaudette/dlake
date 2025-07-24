@@ -7,12 +7,13 @@ import type {
 } from "./interfaces/ICommand";
 
 export class StopCommand implements ICommand {
-	getSlashCommand(): SlashCommandBuilder {
+	public getSlashCommand(): SlashCommandBuilder {
 		return new SlashCommandBuilder()
 			.setName("stop")
 			.setDescription("Stop the music and clear the queue");
 	}
-	async execute(
+
+	public async execute(
 		_interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,
 	): Promise<CommandResult> {
