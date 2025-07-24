@@ -19,7 +19,10 @@ export class ShowQueueCommand implements ICommand {
 		}
 
 		const list = queueSongs
-			.map((song, index) => `${index + 1}. ${song.title}`)
+			.map(
+				(song, index) =>
+					`${index + 1}. ${song.title} - ${song.author} (${song.duration} seconds)`,
+			)
 			.join("\n");
 
 		return {

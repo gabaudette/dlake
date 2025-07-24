@@ -1,4 +1,5 @@
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import { formatTime } from "../utils/time";
 import type {
 	CommandContext,
 	CommandResult,
@@ -20,7 +21,10 @@ export class ShuffleCommand implements ICommand {
 
 		const queueSongs = context.getQueueSongs();
 		const list = queueSongs
-			.map((song, index) => `${index + 1}. ${song.title}`)
+			.map(
+				(song, index) =>
+					`${index + 1}. ${song.title} - ${song.author} (${formatTime(song.duration)})`,
+			)
 			.join("\n");
 
 		return {

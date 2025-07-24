@@ -1,4 +1,5 @@
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import { formatTime } from "../utils/time";
 import type {
 	CommandContext,
 	CommandResult,
@@ -20,7 +21,7 @@ export class NowPlayingCommand implements ICommand {
 
 		return {
 			success: true,
-			message: `🎶 Now playing: **${currentSong.title}**`,
+			message: `🎵 **Now Playing**\n📀 **${currentSong.title}**\n👤 By: ${currentSong.author}\n⏱️ Duration: ${formatTime(currentSong.duration)}\n 🔗 Url: ${currentSong.url}`,
 		};
 	}
 }

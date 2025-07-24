@@ -4,6 +4,7 @@ import type {
 	GuildMember,
 } from "discord.js";
 import type { Queue } from "../queue/Queue";
+import type { Song } from "../types/types";
 import type { CommandContext, ICommand } from "./interfaces/ICommand";
 
 export class CommandHandler {
@@ -60,10 +61,10 @@ export class CommandHandler {
 		interaction: ChatInputCommandInteraction<CacheType>,
 	): CommandContext {
 		return {
-			addSong: async (title: string, url: string): Promise<boolean> => {
+			addSong: async (song: Song): Promise<boolean> => {
 				if (!this.queue) return false;
 				try {
-					await this.queue.addSong({ title, url });
+					await this.queue.addSong(song);
 					return true;
 				} catch (error) {
 					console.error("Error adding song:", error);
@@ -91,14 +92,12 @@ export class CommandHandler {
 				return this.queue?.shuffleQueue() ?? false;
 			},
 
-			getCurrentSong: (): { title: string; url: string } | null => {
-				const song = this.queue?.getCurrentSong();
-				return song ? { title: song.title, url: song.url } : null;
+			getCurrentSong: (): Song | null => {
+				return this.queue?.getCurrentSong() ?? null;
 			},
 
-			getQueueSongs: (): { title: string; url: string }[] => {
-				const songs = this.queue?.getUpcomingSongs() ?? [];
-				return songs.map((song) => ({ title: song.title, url: song.url }));
+			getQueueSongs: (): Song[] => {
+				return this.queue?.getUpcomingSongs() ?? [];
 			},
 
 			isPlaying: (): boolean => {

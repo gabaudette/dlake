@@ -1,5 +1,7 @@
 import ytdl from "@distube/ytdl-core";
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import type { Song } from "../types/types";
+import { formatTime } from "../utils/time";
 import type {
 	CommandContext,
 	CommandResult,
@@ -40,7 +42,13 @@ export class PlayCommand implements ICommand {
 			const isMusicAlreadyPlaying =
 				context.isPlaying() || context.getCurrentSong() !== null;
 
-			const success = await context.addSong(songInfo.title, songInfo.url);
+			const success = await context.addSong({
+				title: songInfo.title,
+				author: songInfo.author,
+				duration: songInfo.duration,
+				url: songInfo.url,
+			});
+
 			if (!success) {
 				return {
 					success: false,
@@ -51,13 +59,13 @@ export class PlayCommand implements ICommand {
 			if (!isMusicAlreadyPlaying) {
 				return {
 					success: true,
-					message: `🎵 Now playing: **${songInfo.title}**`,
+					message: `🎵 **Now Playing**\n📀 **${songInfo.title}**\n👤 By: ${songInfo.author}\n⏱️ Duration: ${formatTime(songInfo.duration)}\n 🔗 Url: ${url}`,
 				};
 			}
-            
+
 			return {
 				success: true,
-				message: `🎵 Added to queue: **${songInfo.title}**`,
+				message: `🎵 **Added to Queue**\n📀 **${songInfo.title}**\n👤 By: ${songInfo.author}\n⏱️ Duration: ${formatTime(songInfo.duration)}\n 🔗 Url: ${url}`,
 			};
 		} catch (error) {
 			console.error("Error in PlayCommand:", error);
@@ -69,13 +77,13 @@ export class PlayCommand implements ICommand {
 		}
 	}
 
-	private async getSongInfo(
-		url: string,
-	): Promise<{ title: string; url: string } | null> {
+	private async getSongInfo(url: string): Promise<Song | null> {
 		try {
 			const info = await ytdl.getInfo(url);
 			return {
 				title: info.videoDetails.title ?? "Unknown video title",
+				author: info.videoDetails.author.name ?? "Unknown author",
+				duration: info.videoDetails.lengthSeconds ?? "0",
 				url,
 			};
 		} catch (error) {

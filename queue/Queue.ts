@@ -7,8 +7,8 @@ import {
 	NoSubscriberBehavior,
 	type VoiceConnection,
 } from "@discordjs/voice";
-import ytdl from "@distube/ytdl-core";
 import type { TextChannel } from "discord.js";
+import { StreamProvider } from "../audio/StreamProvider";
 import type { Song } from "../types/types";
 
 export class Queue {
@@ -89,17 +89,8 @@ export class Queue {
 
 		try {
 			const song = this.songs[0];
-			const buffer = 33_554_432; // 32MB buffer
-			const stream = ytdl(song.url, {
-				filter: "audioonly",
-				quality: "highestaudio",
-				highWaterMark: buffer,
-			});
-
-			stream.on("error", (streamError) => {
-				console.error("YouTube stream error:", streamError.message);
-			});
-
+			const streamProvider = new StreamProvider();
+			const stream = await streamProvider.createStream(song.url);
 			const resource: AudioResource = createAudioResource(stream);
 
 			this.player.play(resource);
