@@ -1,0 +1,19 @@
+import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import type {
+	ICommand,
+	CommandContext,
+	CommandResult,
+} from "./interfaces/ICommand";
+
+export class PingCommand implements ICommand {
+	async execute(
+		_interaction: ChatInputCommandInteraction<CacheType>,
+		_context: CommandContext,
+	): Promise<CommandResult> {
+		return {
+			success: true,
+			message:
+				"🏓 Pong! Bot is working correctly... << DLake official sound ! >>",
+		};
+	}
+}
