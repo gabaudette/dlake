@@ -1,6 +1,6 @@
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
 
-export interface CommandContext {
+export type CommandContext = {
 	addSong: (title: string, url: string) => Promise<boolean>;
 	skipSong: () => boolean;
 	pauseMusic: () => boolean;
@@ -16,12 +16,12 @@ export interface CommandContext {
 
 	isUserInVoiceChannel: () => boolean;
 	getUserVoiceChannelId: () => string | null;
-}
+};
 
-export interface CommandResult {
-	success: boolean;
-	message: string;
-}
+export type CommandResult = {
+		success: boolean;
+		message: string;
+	};
 
 export interface ICommand {
 	execute(
