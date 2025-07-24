@@ -53,7 +53,9 @@ A private Discord music bot (my first) built as a hobby project for learning pur
    ```
 3. Create a `.env` file with your Discord bot token:
    ```
-   DISCORD_TOKEN=your_bot_token_here
+   DISCORD_TOKEN=
+   CLIENT_ID=
+   GUILD_ID=
    ```
 4. Build the project:
    ```bash
@@ -68,8 +70,7 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 
 - `npm run build` - Build the project using Rollup
 - `npm start` - Start the built bot
-- 
-
+  
 ## Technologies Used
 
 - **Discord.js** - Discord API wrapper
