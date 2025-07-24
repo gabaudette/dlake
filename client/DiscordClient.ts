@@ -85,7 +85,6 @@ export class DiscordClient extends Client {
 	): Promise<boolean> {
 		const member = interaction.member as GuildMember;
 		const voiceChannel = member.voice?.channel;
-
 		if (!voiceChannel) {
 			return false;
 		}

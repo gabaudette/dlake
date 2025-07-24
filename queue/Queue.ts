@@ -8,6 +8,7 @@ import {
 	type VoiceConnection,
 } from "@discordjs/voice";
 import type { TextChannel } from "discord.js";
+// Update the import path to match the actual file location and extension
 import { StreamProvider } from "../audio/StreamProvider";
 import type { Song } from "../types/types";
 
@@ -154,7 +155,6 @@ export class Queue {
 
 		remainingSongs.sort(() => Math.random() - SHUFFLE_RANDOM_THRESHOLD);
 		this.songs = [currentSong, ...remainingSongs];
-
 		return true;
 	}
 
