@@ -43,7 +43,6 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 
 - Node.js 18+ 
 - Discord Bot Token & Application Credentials
-- FFmpeg installed on your system
 
 ## Installation
 
