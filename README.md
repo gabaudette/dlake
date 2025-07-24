@@ -61,7 +61,7 @@ A private Discord music bot (my first) built as a hobby project for learning pur
    ```
 5. Start the bot:
    ```bash
-   npm start
+   npm run start
    ```
 
 ## Development
