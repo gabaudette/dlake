@@ -68,34 +68,7 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 
 - `npm run build` - Build the project using Rollup
 - `npm start` - Start the built bot
-- `npm run clean` - Clean the build directory
-
-## Build System
-
-This project uses **Rollup** for building and bundling:
-
-- **TypeScript compilation** with source maps
-- **Tree shaking** for smaller bundle sizes
-- **External dependencies** are not bundled (kept in node_modules)
-- **Source maps** for easier debugging
-
-The build process:
-1. Compiles TypeScript to JavaScript
-2. Resolves imports and dependencies
-3. Creates an optimized bundle in the `dist/` directory
-4. Copies configuration files
-
-## Project Structure
-
-```
-├── functions/
-│   ├── commands.ts    # Slash command registration
-│   └── song.ts        # Music playback logic
-├── types/
-│   └── types.ts       # TypeScript type definitions
-├── index.ts           # Main bot file
-└── package.json
-```
+- 
 
 ## Technologies Used
 
@@ -104,10 +77,6 @@ The build process:
 - **ytdl-core** - YouTube audio streaming
 - **TypeScript** - Type-safe JavaScript
 - **FFmpeg** - Audio processing
-
-## Error Handling
-
-The bot includes comprehensive error handling to prevent crashes
 
 ## Contributing
 
