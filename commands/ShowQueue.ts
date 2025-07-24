@@ -1,4 +1,6 @@
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
+import { formatTime } from "../utils/time";
 import type {
 	CommandContext,
 	CommandResult,
@@ -6,6 +8,11 @@ import type {
 } from "./interfaces/ICommand";
 
 export class ShowQueueCommand implements ICommand {
+	getSlashCommand(): SlashCommandBuilder {
+		return new SlashCommandBuilder()
+			.setName("queue")
+			.setDescription("Show the current music queue");
+	}
 	async execute(
 		_interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,

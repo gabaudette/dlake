@@ -1,5 +1,6 @@
 import ytdl from "@distube/ytdl-core";
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import type { Song } from "../types/types";
 import { formatTime } from "../utils/time";
 import type {
@@ -9,6 +10,17 @@ import type {
 } from "./interfaces/ICommand";
 
 export class PlayCommand implements ICommand {
+	getSlashCommand(): SlashCommandBuilder {
+		return new SlashCommandBuilder()
+			.setName("play")
+			.setDescription("Play a song from a URL")
+			.addStringOption((option) =>
+				option
+					.setName("url")
+					.setDescription("The YouTube URL to play")
+					.setRequired(true),
+			) as SlashCommandBuilder;
+	}
 	async execute(
 		interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,

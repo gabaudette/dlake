@@ -1,4 +1,8 @@
-import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import type {
+	CacheType,
+	ChatInputCommandInteraction,
+	SlashCommandBuilder,
+} from "discord.js";
 import type { Song } from "../../types/types";
 
 export type CommandContext = {
@@ -25,6 +29,7 @@ export type CommandResult = {
 };
 
 export interface ICommand {
+	getSlashCommand(): SlashCommandBuilder;
 	execute(
 		interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,

@@ -1,4 +1,5 @@
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import type {
 	CommandContext,
 	CommandResult,
@@ -6,6 +7,11 @@ import type {
 } from "./interfaces/ICommand";
 
 export class ResumeCommand implements ICommand {
+	getSlashCommand(): SlashCommandBuilder {
+		return new SlashCommandBuilder()
+			.setName("resume")
+			.setDescription("Resume the paused song");
+	}
 	async execute(
 		_interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,

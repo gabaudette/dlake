@@ -1,4 +1,5 @@
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
+import { SlashCommandBuilder } from "discord.js";
 import { formatTime } from "../utils/time";
 import type {
 	CommandContext,
@@ -7,6 +8,11 @@ import type {
 } from "./interfaces/ICommand";
 
 export class NowPlayingCommand implements ICommand {
+	getSlashCommand(): SlashCommandBuilder {
+		return new SlashCommandBuilder()
+			.setName("nowplaying")
+			.setDescription("Show the currently playing song");
+	}
 	async execute(
 		_interaction: ChatInputCommandInteraction<CacheType>,
 		context: CommandContext,

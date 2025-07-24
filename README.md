@@ -35,6 +35,8 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 - `/shuffle` - Shuffle the current queue
 - `/nowplaying` - Show currently playing song
 - `/ping` - Test bot connectivity
+- `/help` - Show availables commands
+- `/about` - Show information about this bot
 
 
 ## Prerequisites

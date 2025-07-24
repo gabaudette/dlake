@@ -10,15 +10,6 @@ import {
 	type TextChannel,
 } from "discord.js";
 import { CommandHandler } from "../commands/CommandHandler";
-import { NowPlayingCommand } from "../commands/NowPlaying";
-import { PauseCommand } from "../commands/Pause";
-import { PingCommand } from "../commands/Ping";
-import { PlayCommand } from "../commands/Play";
-import { ResumeCommand } from "../commands/Resume";
-import { ShowQueueCommand } from "../commands/ShowQueue";
-import { ShuffleCommand } from "../commands/Shuffle";
-import { SkipCommand } from "../commands/Skip";
-import { StopCommand } from "../commands/Stop";
 import { Queue } from "../queue/Queue";
 
 export class DiscordClient extends Client {
@@ -36,11 +27,20 @@ export class DiscordClient extends Client {
 		});
 
 		this.commandHandler = new CommandHandler();
-		this.registerCommands();
 
 		this.once("ready", async () => {
 			try {
 				console.log(`Bot ${this.user?.tag} is online!`);
+				if (process.env.CLIENT_ID && process.env.DISCORD_TOKEN) {
+					await this.commandHandler.deployCommands(
+						process.env.CLIENT_ID,
+						process.env.DISCORD_TOKEN,
+					);
+				} else {
+					console.warn(
+						"CLIENT_ID or DISCORD_TOKEN not found. Slash commands won't be deployed.",
+					);
+				}
 			} catch (e) {
 				console.error("Error during bot initialization:", e);
 				process.exit(1);
@@ -58,18 +58,6 @@ export class DiscordClient extends Client {
 
 			await this.handleInteraction(interaction);
 		});
-	}
-
-	private registerCommands(): void {
-		this.commandHandler.registerCommand("ping", new PingCommand());
-		this.commandHandler.registerCommand("play", new PlayCommand());
-		this.commandHandler.registerCommand("skip", new SkipCommand());
-		this.commandHandler.registerCommand("pause", new PauseCommand());
-		this.commandHandler.registerCommand("resume", new ResumeCommand());
-		this.commandHandler.registerCommand("stop", new StopCommand());
-		this.commandHandler.registerCommand("nowplaying", new NowPlayingCommand());
-		this.commandHandler.registerCommand("queue", new ShowQueueCommand());
-		this.commandHandler.registerCommand("shuffle", new ShuffleCommand());
 	}
 
 	private async handleInteraction(
