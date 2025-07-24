@@ -37,6 +37,9 @@ export class PlayCommand implements ICommand {
 				};
 			}
 
+			const isMusicAlreadyPlaying =
+				context.isPlaying() || context.getCurrentSong() !== null;
+
 			const success = await context.addSong(songInfo.title, songInfo.url);
 			if (!success) {
 				return {
@@ -45,6 +48,13 @@ export class PlayCommand implements ICommand {
 				};
 			}
 
+			if (!isMusicAlreadyPlaying) {
+				return {
+					success: true,
+					message: `🎵 Now playing: **${songInfo.title}**`,
+				};
+			}
+            
 			return {
 				success: true,
 				message: `🎵 Added to queue: **${songInfo.title}**`,
