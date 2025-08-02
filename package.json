@@ -1,0 +1,48 @@
+{
+	"name": "dlake",
+	"version": "1.0.0",
+	"type": "module",
+	"main": "index.js",
+	"scripts": {
+		"build": "rollup -c",
+		"start": "node dist/index.cjs",
+		"clean": "rmdir /s /q dist 2>nul || echo \"No dist folder to clean\""
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/gabaudette/dlake.git"
+	},
+	"keywords": [
+		"discord",
+		"bot",
+		"music"
+	],
+	"author": "Gabriel Audette",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/gabaudette/dlake/issues"
+	},
+	"homepage": "https://github.com/gabaudette/dlake#readme",
+	"description": "",
+	"dependencies": {
+		"@discordjs/voice": "^0.18.0",
+		"@distube/ytdl-core": "^4.16.12",
+		"@ffmpeg-installer/ffmpeg": "^1.1.0",
+		"@types/node": "^24.1.0",
+		"discord.js": "^14.21.0",
+		"dotenv": "^17.2.0",
+		"ffmpeg-static": "^5.2.0",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.8.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.1.2",
+		"@rollup/plugin-commonjs": "^28.0.6",
+		"@rollup/plugin-json": "^6.1.0",
+		"@rollup/plugin-node-resolve": "^16.0.1",
+		"@rollup/plugin-typescript": "^12.1.4",
+		"esbuild": "^0.25.8",
+		"rollup": "^4.45.1",
+		"rollup-plugin-copy": "^3.5.0"
+	}
+}
