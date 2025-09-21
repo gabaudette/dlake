@@ -69,7 +69,7 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 ## Development
 
 - `npm run build` - Build the project using Rollup
-- `npm start` - Start the built bot
+- `npm run start` - Start the built bot
   
 ## Technologies Used
 
