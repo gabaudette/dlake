@@ -1,28 +1,43 @@
-import type { Readable } from "node:stream";
-import ytdl from "@distube/ytdl-core";
+import { Readable } from "node:stream";
+import YTDlpWrap from "./YTDLp/YTDLpWrap";
+
+
 
 export interface IStreamProvider {
 	createStream(url: string): Promise<Readable>;
 }
 
 export class StreamProvider implements IStreamProvider {
-	private readonly buffer: number = 33_554_432; // 32MB buffer
-
 	public async createStream(url: string): Promise<Readable> {
+		const y = new YTDlpWrap(process.env.YTDLP_PATH);
+
 		try {
-			const stream = ytdl(url, {
-				filter: "audioonly",
-				quality: "highestaudio",
-				highWaterMark: this.buffer,
+			const stream = y.execStream([
+				url,
+				"-f",
+				"bestaudio",
+				"-o",
+				"-",
+				"--no-playlist",
+				"--audio-format",
+				"opus",
+				"--no-cache-dir",
+				"--force-ipv4",
+			]);
+
+			stream.on("end", () => {
+				if (stream.destroyed) return;
+				stream.destroy();
 			});
 
-			stream.on("error", (streamError) => {
-				console.error("YouTube stream error:", streamError.message);
+			stream.on("error", (error) => {
+				console.error("Stream error:", error);
+				stream.destroy();
 			});
 
 			return stream;
 		} catch (error) {
-			console.error("Error creating stream:", error);
+			console.error("yt-dlp error:", error);
 			throw error;
 		}
 	}

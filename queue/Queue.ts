@@ -5,6 +5,7 @@ import {
 	createAudioPlayer,
 	createAudioResource,
 	NoSubscriberBehavior,
+	StreamType,
 	type VoiceConnection,
 } from "@discordjs/voice";
 import type { TextChannel } from "discord.js";
@@ -198,7 +199,9 @@ export class Queue {
 			const song = this.songs[0];
 			const streamProvider = new StreamProvider();
 			const stream = await streamProvider.createStream(song.url);
-			const resource: AudioResource = createAudioResource(stream);
+			const resource: AudioResource = createAudioResource(stream, {
+				inputType: StreamType.Arbitrary
+			});
 
 			this.player.play(resource);
 		} catch (error) {
