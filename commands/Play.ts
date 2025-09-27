@@ -1,4 +1,3 @@
-import ytdl from "@distube/ytdl-core";
 import type { CacheType, ChatInputCommandInteraction } from "discord.js";
 import { SlashCommandBuilder } from "discord.js";
 import type { Song } from "../types/types";
@@ -8,6 +7,7 @@ import type {
 	CommandResult,
 	ICommand,
 } from "./interfaces/ICommand";
+import YTDlpWrap from "../audio/YTDLp/YTDLpWrap";
 
 export class PlayCommand implements ICommand {
 	public getSlashCommand(): SlashCommandBuilder {
@@ -91,17 +91,25 @@ export class PlayCommand implements ICommand {
 	}
 
 	private async getSongInfo(url: string): Promise<Song | null> {
-		try {
-			const info = await ytdl.getInfo(url);
-			return {
-				title: info.videoDetails.title ?? "Unknown video title",
-				author: info.videoDetails.author.name ?? "Unknown author",
-				duration: info.videoDetails.lengthSeconds ?? "0",
-				url,
-			};
-		} catch (error) {
-			console.error("Error fetching video info:", error);
-			return null;
-		}
+	try {
+            const y = new YTDlpWrap(process.env.YTDLP_PATH);
+            const output = await y.execPromise([
+                url,
+                "--print-json",
+                "--no-playlist",
+                "--skip-download"
+            ]);
+
+            const info = JSON.parse(output);
+            return {
+                title: info.title ?? "Unknown video title",
+                author: info.uploader ?? "Unknown author",
+                duration: info.duration ?? "0",
+                url,
+            };
+        } catch (error) {
+            console.error("Error fetching video info:", error);
+            return null;
+        }
 	}
 }
