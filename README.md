@@ -2,7 +2,7 @@
 
 A private Discord music bot (my first) built as a hobby project for learning purposes and use among friends in private Discord servers.
 
-## ⚠️ Important Legal Disclaimer
+## Important Legal Disclaimer
 
 **This project is intended for PRIVATE, NON-COMMERCIAL use only as a learning exercise.**
 
@@ -12,18 +12,6 @@ A private Discord music bot (my first) built as a hobby project for learning pur
 - **DO NOT use this bot publicly or commercially**
 - **Users assume all legal risks and responsibilities**
 - Consider using official music streaming services or APIs for any public/commercial projects
-
-## Features
-
-- 🎵 Play music from YouTube URLs
-- ⏭️ Skip tracks
-- ⏸️ Pause/Resume playback
-- 🛑 Stop and clear queue
-- 📜 View current queue
-- 🔀 Shuffle the queue
-- 🎶 Show currently playing track
-- 🏓 Ping command for testing
-
 ## Commands
 
 - `/play <url>` - Play a YouTube video
